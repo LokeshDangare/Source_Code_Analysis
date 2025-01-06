@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv, find_dotenv
 from src.helper import load_embeddings
 from langchain.vectorstores import Chroma
-from langchain_groq import ChatGroq
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.memory import ConversationSummaryMemory
 from langchain.chains import ConversationalRetrievalChain
 from src.helper import repo_ingestion
@@ -12,7 +12,7 @@ from flask import Flask, render_template, jsonify, request
 app = Flask(__name__)
 
 _ = load_dotenv(find_dotenv())
-GROQ_API_KEY = os.environ["GROQ_API_KEY"]
+GOOGLE_API_KEY = os.environ["GOOGLE_API_KEY"]
 
 embeddings = load_embeddings()
 persist_directory = "db"
@@ -22,7 +22,7 @@ vectordb = Chroma(
     embedding_function=embeddings
 )
 
-llm = ChatGroq(model="llama3-70b-8192", api_key=GROQ_API_KEY)
+llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro", temperature=0.3, max_tokens=500)
 memory = ConversationSummaryMemory(llm=llm, memory_key="chat_history", return_messages=True)
 qa = ConversationalRetrievalChain.from_llm(llm, retriever=vectordb.as_retriever(search_type="mmr", search_kwargs={"k":8}), memory=memory)
 
@@ -56,4 +56,4 @@ def chat():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000, debug=True)
+    app.run(host="0.0.0.0", port=8080, debug=True)

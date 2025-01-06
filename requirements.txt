@@ -9,3 +9,4 @@ chromadb
 flask
 GitPython
 sentence-transformers==3.0.1
+langchain-google-genai
